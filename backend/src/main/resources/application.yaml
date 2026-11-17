@@ -8,3 +8,8 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+
+erstorage:
+  jwt:
+    secret: ${JWT_SECRET:m324%&l0%$!_jdaida@jdhasñ$%jsai?¿!.%5khsdfosd&%/%:)·}
+    expiration: 24h

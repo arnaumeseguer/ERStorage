@@ -11,23 +11,24 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Locale;
 
-
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     @Transactional
-    public UserResponse register(RegisterRequest request){
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
+    public UserResponse register(RegisterRequest request) {
+        String email = normalizeEmail(request.email());
 
-        if (userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
         }
 
@@ -36,5 +37,21 @@ public class AuthService {
         User saved = userRepository.save(user);
 
         return UserResponse.from(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        String email = normalizeEmail(request.email());
+
+        User user = userRepository.findByEmail(email)
+                .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+        String token = tokenService.createToken(user);
+        return new LoginResponse(token, tokenService.expirationSeconds(), UserResponse.from(user));
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
