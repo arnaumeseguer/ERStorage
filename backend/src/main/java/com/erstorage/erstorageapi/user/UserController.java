@@ -1,5 +1,6 @@
 package com.erstorage.erstorageapi.user;
 
+import com.erstorage.erstorageapi.auth.CurrentUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = CurrentUser.id(jwt);
         return userService.getById(userId);
     }
 }
