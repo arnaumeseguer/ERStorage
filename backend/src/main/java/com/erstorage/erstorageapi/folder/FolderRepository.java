@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface FolderRepository extends JpaRepository<Folder, UUID> {
 
-    Optional<Folder> findByIDAndOwnerID(UUID id, UUID ownerID);
+    Optional<Folder> findByIdAndOwnerId(UUID id, UUID ownerID);
 
-    List<Folder> findByOwnerIDAndParentIsNullOrderByNameAsc(UUID ownerID);
+    List<Folder> findByOwnerIdAndParentIsNullOrderByNameAsc(UUID ownerID);
 
     List<Folder> findByOwnerIdAndParentIdOrderByNameAsc(UUID ownerID, UUID parentID);
 
