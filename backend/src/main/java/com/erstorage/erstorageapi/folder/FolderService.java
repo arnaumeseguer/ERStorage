@@ -1,6 +1,7 @@
 package com.erstorage.erstorageapi.folder;
 
 import com.erstorage.erstorageapi.file.FileRepository;
+import com.erstorage.erstorageapi.file.FileResponse;
 import com.erstorage.erstorageapi.file.StoredObject;
 import com.erstorage.erstorageapi.storage.StorageService;
 import com.erstorage.erstorageapi.user.UserRepository;
@@ -38,7 +39,13 @@ public class FolderService {
                 .map(FolderResponse::from)
                 .toList();
 
-        return new FolderContentsResponse(null, List.of(), folders);
+        List<FileResponse> files = fileRepository
+                .findByOwnerIdAndFolderIsNullOrderByNameAsc(ownerId)
+                .stream()
+                .map(FileResponse::from)
+                .toList();
+
+        return new FolderContentsResponse(null, List.of(), folders, files);
     }
 
     @Transactional(readOnly = true)
@@ -51,7 +58,13 @@ public class FolderService {
                 .map(FolderResponse::from)
                 .toList();
 
-        return new FolderContentsResponse(FolderResponse.from(folder), buildBreadcrumbs(folder), subfolders);
+        List<FileResponse> files = fileRepository
+                .findByOwnerIdAndFolderIdOrderByNameAsc(ownerId, folder.getId())
+                .stream()
+                .map(FileResponse::from)
+                .toList();
+
+        return new FolderContentsResponse(FolderResponse.from(folder), buildBreadcrumbs(folder), subfolders, files);
     }
 
     // --------------> changing <--------------
