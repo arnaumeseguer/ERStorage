@@ -9,6 +9,11 @@ spring:
     problemdetails:
       enabled: true
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 101MB
+
 erstorage:
   jwt:
     secret: ${JWT_SECRET:m324%&l0%$!_jdaida@jdhasñ$%jsai?¿!.%5khsdfosd&%/%:)·}
