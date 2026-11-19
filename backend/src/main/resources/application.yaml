@@ -13,3 +13,10 @@ erstorage:
   jwt:
     secret: ${JWT_SECRET:m324%&l0%$!_jdaida@jdhasñ$%jsai?¿!.%5khsdfosd&%/%:)·}
     expiration: 24h
+  storage:
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+    region: ${STORAGE_REGION:us-east-1}
+    access-key: ${STORAGE_ACCESS_KEY:erstorage}
+    secret-key: ${STORAGE_SECRET_KEY:erstorage-secret}
+    bucket: ${STORAGE_BUCKET:erstorage}
+    create-bucket-on-startup: ${STORAGE_CREATE_BUCKET:true}
