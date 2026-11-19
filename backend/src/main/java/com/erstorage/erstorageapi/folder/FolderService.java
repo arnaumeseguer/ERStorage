@@ -1,21 +1,31 @@
 package com.erstorage.erstorageapi.folder;
 
+import com.erstorage.erstorageapi.file.FileRepository;
+import com.erstorage.erstorageapi.file.StoredObject;
+import com.erstorage.erstorageapi.storage.StorageService;
+import com.erstorage.erstorageapi.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class FolderService {
 
     private final FolderRepository folderRepository;
+    private final FileRepository fileRepository;
+    private final UserRepository userRepository;
+    private final StorageService storageService;
 
-    public FolderService(FolderRepository folderRepository) {
+
+    public FolderService(FolderRepository folderRepository, FileRepository fileRepository,
+                         UserRepository userRepository, StorageService storageService) {
         this.folderRepository = folderRepository;
+        this.fileRepository = fileRepository;
+        this.userRepository = userRepository;
+        this.storageService = storageService;
     }
 
     // --------------> Reading <--------------
@@ -89,7 +99,20 @@ public class FolderService {
     @Transactional
     public void delete(UUID ownerId, UUID folderId) {
         Folder folder = findOwned(ownerId, folderId);
+
+        List<UUID> folderIds = collectSubtreeIds(ownerId, folder.getId());
+        List<StoredObject> storedObjects = fileRepository.findStoredObjectsInFolders(ownerId, folderIds);
+
+        long totalBytes = storedObjects.stream().mapToLong(StoredObject::sizeBytes).sum();
+        List<String> storageKeys = storedObjects.stream().map(StoredObject::storageKey).toList();
+
         folderRepository.delete(folder);
+        folderRepository.flush();
+
+        if (totalBytes > 0) {
+            userRepository.releaseStorage(ownerId, totalBytes);
+        }
+        storageService.deleteAll(storageKeys);
     }
 
     // --------------> helpers <--------------
@@ -128,5 +151,20 @@ public class FolderService {
             current = current.getParent();
         }
         return false;
+    }
+
+    private List<UUID> collectSubtreeIds(UUID ownerId, UUID rootId) {
+        List<UUID> ids = new ArrayList<>();
+        Deque<UUID> toVisit = new ArrayDeque<>();
+        toVisit.push(rootId);
+
+        while (!toVisit.isEmpty()) {
+            UUID current = toVisit.pop();
+            ids.add(current);
+            for (UUID childId : folderRepository.findChildIds(ownerId, current)) {
+                toVisit.push(childId);
+            }
+        }
+        return ids;
     }
 }

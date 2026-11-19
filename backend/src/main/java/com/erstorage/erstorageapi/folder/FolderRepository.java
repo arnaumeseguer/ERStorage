@@ -1,6 +1,8 @@
 package com.erstorage.erstorageapi.folder;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,9 @@ public interface FolderRepository extends JpaRepository<Folder, UUID> {
     List<Folder> findByOwnerIdAndParentIsNullOrderByNameAsc(UUID ownerID);
 
     List<Folder> findByOwnerIdAndParentIdOrderByNameAsc(UUID ownerID, UUID parentID);
+
+    @Query("select f.id from Folder f where f.ownerId = :ownerId and f.parent.id = :parentId")
+    List<UUID> findChildIds(@Param("ownerId") UUID ownerId, @Param("parentId") UUID parentId);
 
     boolean existsByOwnerIdAndParentIsNullAndName(UUID ownerId, String name);
 
