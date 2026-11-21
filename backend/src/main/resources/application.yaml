@@ -20,7 +20,7 @@ spring:
 
 erstorage:
   jwt:
-    secret: ${JWT_SECRET:m324%&l0%$!_jdaida@jdhasñ$%jsai?¿!.%5khsdfosd&%/%:)·}
+    secret: ${JWT_SECRET}
     expiration: 24h
   storage:
     endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
@@ -31,3 +31,6 @@ erstorage:
     create-bucket-on-startup: ${STORAGE_CREATE_BUCKET:true}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+
+server:
+  port: ${PORT:8080}

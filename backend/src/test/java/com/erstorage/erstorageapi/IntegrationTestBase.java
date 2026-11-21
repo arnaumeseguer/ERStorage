@@ -25,7 +25,10 @@ import java.util.UUID;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "erstorage.storage.create-bucket-on-startup=false"
+        properties = {
+                "erstorage.storage.create-bucket-on-startup=false",
+                "erstorage.jwt.secret=test-only-secret-that-is-at-least-32-characters-long"
+        }
 )
 @Import(TestcontainersConfiguration.class)
 abstract class IntegrationTestBase {

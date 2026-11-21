@@ -29,33 +29,6 @@ class FileApiTest extends IntegrationTestBase {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private <T> ResponseEntity<T> upload(String token, String fileName, String content, Class<T> responseType) {
-        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
-        form.add("file", new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)) {
-            @Override
-            public String getFilename() {
-                return fileName;
-            }
-        });
-
-        return client.post()
-                .uri("/api/v1/files")
-                .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(form)
-                .retrieve()
-                .toEntity(responseType);
-    }
-
-    private long usedBytes(String token) {
-        return client.get()
-                .uri("/api/v1/users/me")
-                .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                .retrieve()
-                .body(UserResponse.class)
-                .storageUsedBytes();
-    }
-
     @Test
     void uploadStoresTheBytesAndCountsThemInTheQuota() {
         String token = registerAndLogin(uniqueEmail());
