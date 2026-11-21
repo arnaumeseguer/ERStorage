@@ -3,15 +3,24 @@ package com.erstorage.erstorageapi;
 import com.erstorage.erstorageapi.auth.LoginRequest;
 import com.erstorage.erstorageapi.auth.LoginResponse;
 import com.erstorage.erstorageapi.auth.RegisterRequest;
+import com.erstorage.erstorageapi.folder.CreateFolderRequest;
+import com.erstorage.erstorageapi.folder.FolderResponse;
 import com.erstorage.erstorageapi.storage.StorageService;
+import com.erstorage.erstorageapi.user.UserResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @SpringBootTest(
@@ -19,7 +28,7 @@ import java.util.UUID;
         properties = "erstorage.storage.create-bucket-on-startup=false"
 )
 @Import(TestcontainersConfiguration.class)
-public abstract class IntegrationTestBase {
+abstract class IntegrationTestBase {
 
     protected static final String PASSWORD = "password123";
 
@@ -35,12 +44,14 @@ public abstract class IntegrationTestBase {
     void createClient() {
         client = RestClient.builder()
                 .baseUrl("http://localhost:" + port)
-                .defaultStatusHandler(status ->true, (request, response) -> { })
+                .defaultStatusHandler(status -> true, (request, response) -> { })
                 .build();
     }
 
+    // ---------- users ----------
+
     protected static String uniqueEmail() {
-        return "user-" + UUID.randomUUID()+"@example.com";
+        return "user-" + UUID.randomUUID() + "@example.com";
     }
 
     protected String registerAndLogin(String email) {
@@ -63,5 +74,54 @@ public abstract class IntegrationTestBase {
 
     protected static String bearer(String token) {
         return "Bearer " + token;
+    }
+
+    protected long usedBytes(String token) {
+        return client.get()
+                .uri("/api/v1/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .retrieve()
+                .body(UserResponse.class)
+                .storageUsedBytes();
+    }
+
+    // ---------- folders ----------
+
+    protected ResponseEntity<FolderResponse> createFolder(String token, String name, UUID parentId) {
+        return client.post()
+                .uri("/api/v1/folders")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new CreateFolderRequest(name, parentId))
+                .retrieve()
+                .toEntity(FolderResponse.class);
+    }
+
+    // ---------- files ----------
+
+    protected <T> ResponseEntity<T> upload(String token, String fileName, String content, Class<T> responseType) {
+        return upload(token, fileName, content, null, responseType);
+    }
+
+    protected <T> ResponseEntity<T> upload(String token, String fileName, String content, UUID folderId,
+                                           Class<T> responseType) {
+        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+        form.add("file", new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public String getFilename() {
+                return fileName;
+            }
+        });
+        if (folderId != null) {
+            form.add("folderId", folderId.toString());
+        }
+
+        return client.post()
+                .uri("/api/v1/files")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(form)
+                .retrieve()
+                .toEntity(responseType);
     }
 }

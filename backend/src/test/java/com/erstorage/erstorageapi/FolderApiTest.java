@@ -1,5 +1,6 @@
 package com.erstorage.erstorageapi;
 
+import com.erstorage.erstorageapi.file.FileResponse;
 import com.erstorage.erstorageapi.folder.BreadcrumbItem;
 import com.erstorage.erstorageapi.folder.CreateFolderRequest;
 import com.erstorage.erstorageapi.folder.FolderContentsResponse;
@@ -14,18 +15,10 @@ import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 
 class FolderApiTest extends IntegrationTestBase {
-
-    private ResponseEntity<FolderResponse> createFolder(String token, String name, UUID parentId) {
-        return client.post()
-                .uri("/api/v1/folders")
-                .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new CreateFolderRequest(name, parentId))
-                .retrieve()
-                .toEntity(FolderResponse.class);
-    }
 
     @Test
     void openingANestedFolderReturnsItsBreadcrumbs() {
@@ -84,5 +77,32 @@ class FolderApiTest extends IntegrationTestBase {
                 .toBodilessEntity();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void deletingAFolderRemovesEverythingInsideAndGivesTheSpaceBack() {
+        String token = registerAndLogin(uniqueEmail());
+        FolderResponse work = createFolder(token, "Work", null).getBody();
+        FolderResponse year = createFolder(token, "2026", work.id()).getBody();
+        upload(token, "notes.txt", "abc", work.id(), FileResponse.class);
+        upload(token, "invoice.txt", "abcde", year.id(), FileResponse.class);
+        assertThat(usedBytes(token)).isEqualTo(8);
+
+        ResponseEntity<Void> response = client.delete()
+                .uri("/api/v1/folders/{id}", work.id())
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .retrieve()
+                .toBodilessEntity();
+
+        FolderContentsResponse root = client.get()
+                .uri("/api/v1/folders/root")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .retrieve()
+                .body(FolderContentsResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(usedBytes(token)).isZero();
+        assertThat(root.folders()).isEmpty();
+        verify(storageService).deleteAll(argThat(keys -> keys.size() == 2));
     }
 }
