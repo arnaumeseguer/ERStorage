@@ -1,1 +1,60 @@
-<p>login-page works!</p>
+<main class="login">
+  <section class="card">
+    <header class="brand">
+      <span class="logo" aria-hidden="true">ER</span>
+      <h1>ERStorage</h1>
+      <p class="subtitle">Sign in to your files</p>
+    </header>
+
+    <app-server-status-banner />
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label class="field">
+        <span>Email</span>
+        <input
+          type="email"
+          formControlName="email"
+          autocomplete="username"
+          [class.invalid]="hasError('email', 'required') || hasError('email', 'email') || fieldErrors()['email']"
+        />
+        @if (hasError('email', 'required')) {
+          <small class="field-error">Enter your email.</small>
+        } @else if (hasError('email', 'email')) {
+          <small class="field-error">That doesn't look like an email address.</small>
+        } @else if (fieldErrors()['email']) {
+          <small class="field-error">{{ fieldErrors()['email'] }}</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          [class.invalid]="hasError('password', 'required') || fieldErrors()['password']"
+        />
+        @if (hasError('password', 'required')) {
+          <small class="field-error">Enter your password.</small>
+        } @else if (fieldErrors()['password']) {
+          <small class="field-error">{{ fieldErrors()['password'] }}</small>
+        }
+      </label>
+
+      @if (errorMessage()) {
+        <p class="form-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <button type="submit" class="btn-primary submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="spinner" aria-hidden="true"></span>
+          Signing in…
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+
+    <p class="note">Registration is closed — this is a personal instance.</p>
+  </section>
+</main>

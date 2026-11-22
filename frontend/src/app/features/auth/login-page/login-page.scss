@@ -1,0 +1,98 @@
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: linear-gradient(160deg, var(--green-50), var(--gray-50));
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 0.06);
+}
+
+.brand {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--green-500);
+  color: #fff;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--gray-500);
+}
+
+form {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.field input {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px var(--green-100);
+}
+
+.field input.invalid {
+  border-color: var(--red-600);
+}
+
+.field-error {
+  color: var(--red-600);
+  font-weight: 400;
+}
+
+.form-error {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--red-50);
+  color: var(--red-600);
+  font-size: 0.9rem;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.note {
+  margin: 1.25rem 0 0;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  text-align: center;
+}

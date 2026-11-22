@@ -1,0 +1,17 @@
+@if (server.status() === 'checking' && server.isSlow()) {
+  <div class="banner banner--waking" role="status">
+    <span class="spinner" aria-hidden="true"></span>
+    <div>
+      <strong>Waking up the server…</strong>
+      <p>ERStorage runs on a free host that sleeps when nobody uses it. This can take a minute or two — you can already type your details.</p>
+    </div>
+  </div>
+} @else if (server.status() === 'offline') {
+  <div class="banner banner--offline" role="alert">
+    <div>
+      <strong>Can't reach the server.</strong>
+      <p>Check your connection and try again.</p>
+    </div>
+    <button type="button" (click)="server.check()">Try again</button>
+  </div>
+}
