@@ -1,0 +1,18 @@
+<dialog #dialog class="dialog" role="alertdialog" (keydown.escape)="onEscape($event)" (cancel)="onCancel($event)" (close)="cancelled.emit()">
+  <h2>{{ heading() }}</h2>
+  <p class="dialog-text">{{ message() }}</p>
+
+  @if (error()) {
+    <p class="dialog-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="dialog-actions">
+    <button type="button" class="btn-secondary" (click)="close()" [disabled]="busy()">Cancel</button>
+    <button type="button" class="btn-danger" (click)="confirmed.emit()" [disabled]="busy()">
+      @if (busy()) {
+        <span class="spinner" aria-hidden="true"></span>
+      }
+      {{ confirmLabel() }}
+    </button>
+  </div>
+</dialog>

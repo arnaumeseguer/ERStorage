@@ -8,6 +8,7 @@
   </div>
 } @else if (server.status() === 'offline') {
   <div class="banner banner--offline" role="alert">
+    <svg lucideWifiOff [size]="20" aria-hidden="true"></svg>
     <div>
       <strong>Can't reach the server.</strong>
       <p>Check your connection and try again.</p>

@@ -1,0 +1,57 @@
+<dialog #dialog class="dialog" (keydown.escape)="onEscape($event)" (cancel)="onCancel($event)" (close)="cancelled.emit()">
+  <h2>Move “{{ target().item.name }}”</h2>
+
+  <nav class="crumbs" aria-label="Destination">
+    <button type="button" (click)="open(null)" [disabled]="location() === null">Home</button>
+    @for (item of trail(); track item.id; let last = $last) {
+      <span aria-hidden="true">/</span>
+      <button type="button" (click)="open(item.id)" [disabled]="last">{{ item.name }}</button>
+    }
+  </nav>
+
+  <div class="list">
+    @if (contents.error()) {
+      <div class="list-state">
+        <p>Couldn't load folders.</p>
+        <button type="button" class="btn-secondary" (click)="contents.reload()">Try again</button>
+      </div>
+    } @else if (contents.hasValue()) {
+      @for (folder of folders(); track folder.id) {
+        <button type="button" class="folder" (click)="open(folder.id)">
+          <svg lucideFolder class="folder-icon" [size]="18" aria-hidden="true"></svg>
+          <span class="folder-name">{{ folder.name }}</span>
+          <svg lucideChevronRight [size]="16" aria-hidden="true"></svg>
+        </button>
+      } @empty {
+        <p class="list-state">No folders here.</p>
+      }
+    } @else {
+      <div class="list-state">
+        <span class="spinner" aria-hidden="true"></span>
+      </div>
+    }
+  </div>
+
+  @if (isCurrentLocation()) {
+    <p class="hint">It's already in this folder.</p>
+  }
+
+  @if (error()) {
+    <p class="dialog-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="dialog-actions">
+    <button type="button" class="btn-secondary" (click)="close()" [disabled]="busy()">Cancel</button>
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="confirmed.emit(location())"
+      [disabled]="busy() || isCurrentLocation() || !contents.hasValue()"
+    >
+      @if (busy()) {
+        <span class="spinner" aria-hidden="true"></span>
+      }
+      Move here
+    </button>
+  </div>
+</dialog>

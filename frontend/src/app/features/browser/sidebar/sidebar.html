@@ -1,0 +1,48 @@
+<aside class="sidebar">
+  <a routerLink="/files" class="brand">
+    <span class="logo" aria-hidden="true">ER</span>
+    <span>ERStorage</span>
+  </a>
+
+  <nav class="nav">
+    <a routerLink="/files" routerLinkActive="active">
+      <svg lucideFolder [size]="18" aria-hidden="true"></svg>
+      My files
+    </a>
+  </nav>
+
+  <div class="spacer"></div>
+
+  @if (user(); as user) {
+    <section class="storage" aria-label="Storage usage">
+      <div class="storage-header">
+        <span>Storage</span>
+        <span>{{ usedPercent() }}%</span>
+      </div>
+      <div
+        class="bar"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="usedPercent()"
+      >
+        <div class="bar-fill" [class.nearly-full]="nearlyFull()" [style.width.%]="usedPercent()"></div>
+      </div>
+      <p class="storage-text">
+        {{ user.storageUsedBytes | fileSize }} of {{ user.storageQuotaBytes | fileSize }} used
+      </p>
+    </section>
+
+    <div class="account">
+      <div class="avatar" aria-hidden="true">{{ user.displayName.charAt(0) }}</div>
+      <div class="account-text">
+        <strong>{{ user.displayName }}</strong>
+        <small>{{ user.email }}</small>
+      </div>
+      <button type="button" class="logout" (click)="auth.logout()" title="Log out">
+        <svg lucideLogOut [size]="16" aria-hidden="true"></svg>
+        <span class="logout-text">Log out</span>
+      </button>
+    </div>
+  }
+</aside>

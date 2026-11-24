@@ -53,3 +53,7 @@ export interface ProblemDetail {
   detail?: string;
   errors?: Record<string, string>;
 }
+
+export type BrowserItem =
+  | { kind: 'folder'; item: FolderResponse }
+  | { kind: 'file'; item: FileResponse };

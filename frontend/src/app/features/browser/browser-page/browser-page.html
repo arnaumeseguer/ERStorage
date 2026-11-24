@@ -1,1 +1,254 @@
-<p>browser-page works!</p>
+<div class="layout">
+  <app-sidebar />
+
+  <main class="content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      @if (trail().length === 0) {
+        <span class="current" aria-current="page">Home</span>
+      } @else {
+        <a routerLink="/files">Home</a>
+        @for (item of trail(); track item.id; let last = $last) {
+          <span class="separator" aria-hidden="true">/</span>
+          @if (last) {
+            <span class="current" aria-current="page">{{ item.name }}</span>
+          } @else {
+            <a [routerLink]="['/files', item.id]">{{ item.name }}</a>
+          }
+        }
+      }
+    </nav>
+
+    <header class="page-header">
+      <h1>{{ title() }}</h1>
+      @if (contents.isLoading() && contents.hasValue()) {
+        <span class="spinner refreshing" aria-label="Refreshing"></span>
+      }
+      <button
+        type="button"
+        class="btn-primary new-folder"
+        (click)="openDialog({ type: 'create-folder' })"
+        [disabled]="!contents.hasValue()"
+      >
+        <svg lucideFolderPlus [size]="18" aria-hidden="true"></svg>
+        New folder
+      </button>
+    </header>
+
+    @if (actionError()) {
+      <div class="action-error" role="alert">
+        <span>{{ actionError() }}</span>
+        <button type="button" (click)="actionError.set(null)" aria-label="Dismiss">
+          <svg lucideX [size]="16" aria-hidden="true"></svg>
+        </button>
+      </div>
+    }
+
+    @if (contents.error()) {
+      <div class="state" role="alert">
+        @if (isNotFound()) {
+          <svg lucideSearchX class="state-icon" [size]="40" aria-hidden="true"></svg>
+          <p>This folder doesn't exist or you don't have access to it.</p>
+          <a routerLink="/files" class="btn-primary">Go to My files</a>
+        } @else {
+          <svg lucideTriangleAlert class="state-icon" [size]="40" aria-hidden="true"></svg>
+          <p>Couldn't load this folder.</p>
+          <button type="button" class="btn-primary" (click)="contents.reload()">Try again</button>
+        }
+      </div>
+    } @else if (contents.hasValue()) {
+      @if (isEmpty()) {
+        <div class="state">
+          <svg lucideFolderOpen class="state-icon" [size]="40" aria-hidden="true"></svg>
+          <p>This folder is empty.</p>
+        </div>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="col-name">
+                <button type="button" class="sort" (click)="sortBy('name')">
+                  Name
+                  @if (sortKey() === 'name') {
+                    <svg [lucideIcon]="sortIcon()" [size]="14" aria-hidden="true"></svg>
+                  }
+                </button>
+              </th>
+              <th class="col-size">
+                <button type="button" class="sort" (click)="sortBy('size')">
+                  Size
+                  @if (sortKey() === 'size') {
+                    <svg [lucideIcon]="sortIcon()" [size]="14" aria-hidden="true"></svg>
+                  }
+                </button>
+              </th>
+              <th class="col-date">
+                <button type="button" class="sort" (click)="sortBy('updated')">
+                  Modified
+                  @if (sortKey() === 'updated') {
+                    <svg [lucideIcon]="sortIcon()" [size]="14" aria-hidden="true"></svg>
+                  }
+                </button>
+              </th>
+              <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (folder of folders(); track folder.id) {
+              <tr>
+                <td class="col-name">
+                  <a class="name" [routerLink]="['/files', folder.id]" [title]="folder.name">
+                    <svg lucideFolder class="icon icon--folder" [size]="18" aria-hidden="true"></svg>
+                    <span class="name-text">{{ folder.name }}</span>
+                  </a>
+                </td>
+                <td class="col-size muted">—</td>
+                <td class="col-date muted">{{ folder.updatedAt | date: 'mediumDate' }}</td>
+                <td class="col-actions">
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Rename"
+                      [attr.aria-label]="'Rename ' + folder.name"
+                      (click)="openDialog({ type: 'rename', target: { kind: 'folder', item: folder } })"
+                    >
+                      <svg lucidePencil [size]="16" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Move"
+                      [attr.aria-label]="'Move ' + folder.name"
+                      (click)="openDialog({ type: 'move', target: { kind: 'folder', item: folder } })"
+                    >
+                      <svg lucideFolderInput [size]="16" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button icon-button--danger"
+                      title="Delete"
+                      [attr.aria-label]="'Delete ' + folder.name"
+                      (click)="openDialog({ type: 'delete', target: { kind: 'folder', item: folder } })"
+                    >
+                      <svg lucideTrash2 [size]="16" aria-hidden="true"></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (file of files(); track file.id) {
+              <tr>
+                <td class="col-name">
+                  <button type="button" class="name file-button" [title]="file.name" (click)="download(file)">
+                    <svg [lucideIcon]="fileIcon(file.contentType)" class="icon" [size]="18" aria-hidden="true"></svg>
+                    <span class="name-text">{{ file.name }}</span>
+                  </button>
+                </td>
+                <td class="col-size">{{ file.sizeBytes | fileSize }}</td>
+                <td class="col-date muted">{{ file.updatedAt | date: 'mediumDate' }}</td>
+                <td class="col-actions">
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Download"
+                      [attr.aria-label]="'Download ' + file.name"
+                      [disabled]="downloadingId() !== null"
+                      (click)="download(file)"
+                    >
+                      @if (downloadingId() === file.id) {
+                        <span class="spinner" aria-hidden="true"></span>
+                      } @else {
+                        <svg lucideDownload [size]="16" aria-hidden="true"></svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Rename"
+                      [attr.aria-label]="'Rename ' + file.name"
+                      (click)="openDialog({ type: 'rename', target: { kind: 'file', item: file } })"
+                    >
+                      <svg lucidePencil [size]="16" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button"
+                      title="Move"
+                      [attr.aria-label]="'Move ' + file.name"
+                      (click)="openDialog({ type: 'move', target: { kind: 'file', item: file } })"
+                    >
+                      <svg lucideFolderInput [size]="16" aria-hidden="true"></svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button icon-button--danger"
+                      title="Delete"
+                      [attr.aria-label]="'Delete ' + file.name"
+                      (click)="openDialog({ type: 'delete', target: { kind: 'file', item: file } })"
+                    >
+                      <svg lucideTrash2 [size]="16" aria-hidden="true"></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    } @else {
+      <div class="state">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Loading…</p>
+      </div>
+    }
+  </main>
+</div>
+
+@if (isCreatingFolder()) {
+  <app-name-dialog
+    heading="New folder"
+    label="Folder name"
+    confirmLabel="Create"
+    [busy]="busy()"
+    [error]="dialogError()"
+    (confirmed)="createFolder($event)"
+    (cancelled)="closeDialog()"
+  />
+}
+
+@if (renameTarget(); as target) {
+  <app-name-dialog
+    [heading]="target.kind === 'folder' ? 'Rename folder' : 'Rename file'"
+    label="New name"
+    confirmLabel="Rename"
+    [initialValue]="target.item.name"
+    [selectBeforeExtension]="target.kind === 'file'"
+    [busy]="busy()"
+    [error]="dialogError()"
+    (confirmed)="rename(target, $event)"
+    (cancelled)="closeDialog()"
+  />
+}
+
+@if (moveTarget(); as target) {
+  <app-move-dialog
+    [target]="target"
+    [busy]="busy()"
+    [error]="dialogError()"
+    (confirmed)="move(target, $event)"
+    (cancelled)="closeDialog()"
+  />
+}
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    [heading]="target.kind === 'folder' ? 'Delete folder?' : 'Delete file?'"
+    [message]="deleteMessage(target)"
+    confirmLabel="Delete"
+    [busy]="busy()"
+    [error]="dialogError()"
+    (confirmed)="remove(target)"
+    (cancelled)="closeDialog()"
+  />
+}

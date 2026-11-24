@@ -1,0 +1,168 @@
+:host {
+  position: sticky;
+  top: 0;
+  display: block;
+  height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  padding: 1.25rem 1rem;
+  border-right: 1px solid var(--gray-200);
+  background: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: inherit;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--green-500);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius);
+  color: var(--gray-900);
+  text-decoration: none;
+}
+
+.nav a:hover {
+  background: var(--gray-50);
+}
+
+.nav a.active {
+  background: var(--green-50);
+  color: var(--green-700);
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.storage {
+  font-size: 0.85rem;
+}
+
+.storage-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--gray-200);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green-500);
+  transition: width 0.3s;
+}
+
+.bar-fill.nearly-full {
+  background: var(--red-600);
+}
+
+.storage-text {
+  margin: 0.4rem 0 0;
+  color: var(--gray-500);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-700);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.account-text {
+  display: grid;
+  min-width: 0;
+}
+
+.account-text strong,
+.account-text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-text small {
+  color: var(--gray-500);
+}
+
+.logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+}
+
+.logout:hover {
+  color: var(--red-600);
+  border-color: var(--red-600);
+}
+
+@media (max-width: 720px) {
+  :host {
+    position: static;
+    height: auto;
+  }
+
+  .sidebar {
+    gap: 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .nav,
+  .spacer {
+    display: none;
+  }
+}

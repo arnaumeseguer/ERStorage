@@ -1,0 +1,84 @@
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+
+.crumbs button {
+  padding: 0.15rem 0.35rem;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--green-700);
+}
+
+.crumbs button:hover:not(:disabled) {
+  background: var(--green-50);
+}
+
+.crumbs button:disabled {
+  color: var(--gray-900);
+  font-weight: 600;
+  cursor: default;
+  opacity: 1;
+}
+
+.list {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+}
+
+.folder {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-500);
+  text-align: left;
+}
+
+.folder:last-child {
+  border-bottom: none;
+}
+
+.folder:hover {
+  background: var(--green-50);
+}
+
+.folder-icon {
+  flex-shrink: 0;
+  color: var(--green-600);
+}
+
+.folder-name {
+  flex: 1;
+  overflow: hidden;
+  color: var(--gray-900);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1.5rem;
+  color: var(--gray-500);
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  color: var(--gray-500);
+  font-size: 0.85rem;
+}
