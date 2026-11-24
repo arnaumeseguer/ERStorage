@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
+import { UploadDialog } from '../upload-dialog/upload-dialog';
 import {
   LucideArrowDown,
   LucideArrowUp,
@@ -17,6 +18,7 @@ import {
   LucideTrash2,
   LucideTriangleAlert,
   LucideX,
+  LucideUpload,
 } from '@lucide/angular';
 import { AuthService } from '../../../core/auth.service';
 import { breadcrumbTrail } from '../../../core/breadcrumbs';
@@ -33,6 +35,7 @@ import { Sidebar } from '../sidebar/sidebar';
 
 type DialogState =
   | { type: 'create-folder' }
+  | { type: 'upload' }
   | { type: 'rename' | 'move' | 'delete'; target: BrowserItem };
 
 function targetOf(state: DialogState | null, type: 'rename' | 'move' | 'delete'): BrowserItem | null {
@@ -63,6 +66,8 @@ function targetOf(state: DialogState | null, type: 'rename' | 'move' | 'delete')
     LucideTrash2,
     LucideTriangleAlert,
     LucideX,
+    LucideUpload,
+    UploadDialog,
   ],
   templateUrl: './browser-page.html',
   styleUrl: './browser-page.scss',
@@ -116,6 +121,7 @@ export class BrowserPage {
   protected readonly downloadingId = signal<string | null>(null);
 
   protected readonly isCreatingFolder = computed(() => this.dialog()?.type === 'create-folder');
+  protected readonly isUploadOpen = computed(() => this.dialog()?.type === 'upload');
   protected readonly renameTarget = computed(() => targetOf(this.dialog(), 'rename'));
   protected readonly moveTarget = computed(() => targetOf(this.dialog(), 'move'));
   protected readonly deleteTarget = computed(() => targetOf(this.dialog(), 'delete'));
@@ -181,6 +187,11 @@ export class BrowserPage {
         this.actionError.set(problemMessage(error));
       },
     });
+  }
+
+    protected onUploaded(): void {
+    this.contents.reload();
+    this.auth.loadCurrentUser().subscribe();
   }
 
   private run(request: Observable<unknown>, refreshUser = false): void {

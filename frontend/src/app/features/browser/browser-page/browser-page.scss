@@ -179,8 +179,10 @@ a.name:hover .name-text {
   }
 }
 
-.new-folder {
+.header-actions {
+  display: flex;
   flex-shrink: 0;
+  gap: 0.5rem;
   margin-left: auto;
 }
 
@@ -283,5 +285,9 @@ tbody tr:focus-within .row-actions {
 
   .icon-button {
     width: 30px;
+  }
+
+    .page-header {
+    flex-wrap: wrap;
   }
 }

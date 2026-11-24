@@ -1,0 +1,109 @@
+<dialog
+  #dialog
+  class="dialog upload-dialog"
+  (keydown.escape)="onEscape($event)"
+  (cancel)="onEscape($event)"
+  (close)="closed.emit()"
+>
+  <h2>Upload to “{{ folderName() }}”</h2>
+
+  <div
+    class="dropzone"
+    [class.dragging]="dragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+  >
+    <svg lucideUpload [size]="28" aria-hidden="true"></svg>
+    <p>Drag files here or</p>
+    <button type="button" class="btn-secondary" (click)="chooseFiles()">Choose files</button>
+    <p class="hint">Up to 100 MB per file</p>
+    <input #fileInput type="file" multiple hidden (change)="onFilesSelected($event)" />
+  </div>
+
+  @if (items().length > 0) {
+    <p class="summary" aria-live="polite">{{ summary() }}</p>
+
+    <ul class="uploads">
+      @for (item of items(); track item.id) {
+        <li class="upload">
+          <svg [lucideIcon]="fileIcon(item.file.type)" class="upload-icon" [size]="18" aria-hidden="true"></svg>
+
+          <div class="upload-body">
+            <div class="upload-top">
+              <span class="upload-name" [title]="item.file.name">{{ item.file.name }}</span>
+              <span class="upload-size">{{ item.file.size | fileSize }}</span>
+            </div>
+
+            @switch (item.status) {
+              @case ('pending') {
+                <p class="upload-status">Waiting…</p>
+              }
+              @case ('uploading') {
+                <div class="progress">
+                  <div
+                    class="bar"
+                    role="progressbar"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-valuenow]="item.progress"
+                    [attr.aria-label]="'Uploading ' + item.file.name"
+                  >
+                    <div class="bar-fill" [style.width.%]="item.progress"></div>
+                  </div>
+                  <span>{{ item.progress }}%</span>
+                </div>
+              }
+              @case ('processing') {
+                <p class="upload-status">Saving…</p>
+              }
+              @case ('done') {
+                <p class="upload-status upload-status--done">Uploaded</p>
+              }
+              @case ('cancelled') {
+                <p class="upload-status">Cancelled</p>
+              }
+              @case ('error') {
+                <p class="upload-status upload-status--error">{{ item.error }}</p>
+              }
+            }
+          </div>
+
+          <div class="upload-action">
+            @if (item.status === 'pending' || item.status === 'uploading') {
+              <button
+                type="button"
+                class="icon-button"
+                title="Cancel"
+                [attr.aria-label]="'Cancel ' + item.file.name"
+                (click)="cancel(item)"
+              >
+                <svg lucideX [size]="16" aria-hidden="true"></svg>
+              </button>
+            } @else if (item.status === 'processing') {
+              <span class="spinner" aria-hidden="true"></span>
+            } @else if (item.status === 'error' && item.canRetry) {
+              <button
+                type="button"
+                class="icon-button"
+                title="Retry"
+                [attr.aria-label]="'Retry ' + item.file.name"
+                (click)="retry(item)"
+              >
+                <svg lucideRotateCw [size]="16" aria-hidden="true"></svg>
+              </button>
+            } @else if (item.status === 'done') {
+              <svg lucideCircleCheck class="done-icon" [size]="18" aria-hidden="true"></svg>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="dialog-actions">
+    <button type="button" class="btn-primary" (click)="close()">
+      {{ isUploading() ? 'Cancel and close' : 'Done' }}
+    </button>
+  </div>
+</dialog>

@@ -1,0 +1,137 @@
+.upload-dialog {
+  width: min(520px, calc(100vw - 2rem));
+}
+
+.dropzone {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 2px dashed var(--gray-200);
+  border-radius: 12px;
+  color: var(--gray-500);
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone p {
+  margin: 0;
+}
+
+.dropzone.dragging {
+  border-color: var(--green-500);
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+.hint {
+  font-size: 0.8rem;
+}
+
+.summary {
+  margin: 1rem 0 0.5rem;
+  color: var(--gray-500);
+  font-size: 0.85rem;
+}
+
+.uploads {
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.upload:last-child {
+  border-bottom: none;
+}
+
+.upload-icon {
+  flex-shrink: 0;
+  color: var(--gray-500);
+}
+
+.upload-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.upload-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.upload-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-size {
+  flex-shrink: 0;
+  color: var(--gray-500);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+}
+
+.bar {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--gray-200);
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--green-500);
+  transition: width 0.2s;
+}
+
+.upload-status {
+  margin: 0.25rem 0 0;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+}
+
+.upload-status--done {
+  color: var(--green-700);
+}
+
+.upload-status--error {
+  color: var(--red-600);
+}
+
+.upload-action {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+}
+
+.upload-action .spinner {
+  color: var(--green-500);
+}
+
+.done-icon {
+  color: var(--green-600);
+}

@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   BrowserItem,
   DownloadUrlResponse,
+  FileResponse,
   FolderContentsResponse,
   FolderResponse,
 } from './models';
@@ -41,6 +42,18 @@ export class FilesApiService {
 
   getDownloadUrl(fileId: string): Observable<DownloadUrlResponse> {
     return this.http.get<DownloadUrlResponse>(`${this.baseUrl}/files/${fileId}/download`);
+  }
+
+  upload(file: File, folderId: string | null): Observable<HttpEvent<FileResponse>> {
+    const form = new FormData();
+    form.append('file', file);
+    if (folderId) {
+      form.append('folderId', folderId);
+    }
+    return this.http.post<FileResponse>(`${this.baseUrl}/files`, form, {
+      reportProgress: true,
+      observe: 'events',
+    });
   }
 
   private urlOf(target: BrowserItem): string {

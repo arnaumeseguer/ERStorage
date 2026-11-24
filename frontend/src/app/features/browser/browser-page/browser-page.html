@@ -23,15 +23,26 @@
       @if (contents.isLoading() && contents.hasValue()) {
         <span class="spinner refreshing" aria-label="Refreshing"></span>
       }
-      <button
-        type="button"
-        class="btn-primary new-folder"
-        (click)="openDialog({ type: 'create-folder' })"
-        [disabled]="!contents.hasValue()"
-      >
-        <svg lucideFolderPlus [size]="18" aria-hidden="true"></svg>
-        New folder
-      </button>
+            <div class="header-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="openDialog({ type: 'create-folder' })"
+          [disabled]="!contents.hasValue()"
+        >
+          <svg lucideFolderPlus [size]="18" aria-hidden="true"></svg>
+          New folder
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="openDialog({ type: 'upload' })"
+          [disabled]="!contents.hasValue()"
+        >
+          <svg lucideUpload [size]="18" aria-hidden="true"></svg>
+          Upload
+        </button>
+      </div>
     </header>
 
     @if (actionError()) {
@@ -250,5 +261,14 @@
     [error]="dialogError()"
     (confirmed)="remove(target)"
     (cancelled)="closeDialog()"
+  />
+}
+
+@if (isUploadOpen()) {
+  <app-upload-dialog
+    [folderId]="folderId() ?? null"
+    [folderName]="title()"
+    (uploaded)="onUploaded()"
+    (closed)="closeDialog()"
   />
 }
