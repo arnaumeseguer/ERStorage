@@ -5,6 +5,7 @@ import { guestGuard } from './core/guest.guard';
 export const routes: Routes = [
   {
     path: 'login',
+    title: 'Sign in · ERStorage',
     canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/auth/login-page/login-page').then((m) => m.LoginPage),

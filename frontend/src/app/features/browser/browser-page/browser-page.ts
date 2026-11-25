@@ -1,4 +1,5 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { DatePipe } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -100,6 +101,12 @@ export class BrowserPage {
   );
 
   protected readonly title = computed(() => this.trail().at(-1)?.name ?? 'My files');
+
+  private readonly pageTitle = inject(Title);
+
+  constructor() {
+    effect(() => this.pageTitle.setTitle(`${this.title()} · ERStorage`));
+  }
 
   protected readonly folders = computed(() => {
     const list = this.contents.hasValue() ? this.contents.value().folders : [];
