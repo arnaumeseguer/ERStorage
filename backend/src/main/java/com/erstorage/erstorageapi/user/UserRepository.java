@@ -13,14 +13,19 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
-    @Modifying
+
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             update User u
-                set u.storageUsedBytes = u.storageUsedBytes + :bytes
-              where u.id = :userId
-                and u.storageUsedBytes + :bytes <= u.storageQuotaBytes
+               set u.storageUsedBytes = u.storageUsedBytes + :bytes
+             where u.id = :userId
+               and u.storageUsedBytes + :bytes <= u.storageQuotaBytes
+               and (select coalesce(sum(other.storageUsedBytes), 0) from User other) + :bytes <= :totalLimit
             """)
-    int reserveStorage(@Param("userId") UUID userId, @Param("bytes") long bytes);
+    int reserveStorage(@Param("userId") UUID userId,
+                       @Param("bytes") long bytes,
+                       @Param("totalLimit") long totalLimit);
 
     @Modifying
     @Query("""

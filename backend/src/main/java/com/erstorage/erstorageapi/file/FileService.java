@@ -1,5 +1,6 @@
 package com.erstorage.erstorageapi.file;
 
+import com.erstorage.erstorageapi.common.LimitsProperties;
 import com.erstorage.erstorageapi.folder.Folder;
 import com.erstorage.erstorageapi.folder.FolderRepository;
 import com.erstorage.erstorageapi.storage.StorageService;
@@ -32,13 +33,15 @@ public class FileService {
     private final FolderRepository folderRepository;
     private final UserRepository userRepository;
     private final StorageService storageService;
+    private final LimitsProperties limits;
 
     public FileService(FileRepository fileRepository, FolderRepository folderRepository,
-                       UserRepository userRepository, StorageService storageService) {
+                       UserRepository userRepository, StorageService storageService, LimitsProperties limits) {
         this.fileRepository = fileRepository;
         this.folderRepository = folderRepository;
         this.userRepository = userRepository;
         this.storageService = storageService;
+        this.limits = limits;
     }
 
     // ---------- upload ----------
@@ -56,7 +59,8 @@ public class FileService {
         ensureNameAvailable(ownerId, folder, name);
 
         long size = upload.getSize();
-        if (userRepository.reserveStorage(ownerId, size) == 0) {
+        long totalLimit = limits.totalStorage().toBytes();
+        if (userRepository.reserveStorage(ownerId, size, totalLimit) == 0) {
             throw new ResponseStatusException(HttpStatus.INSUFFICIENT_STORAGE, "Not enough space to upload");
         }
 
