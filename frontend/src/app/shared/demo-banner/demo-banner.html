@@ -1,0 +1,12 @@
+@if (minutesLeft(); as minutes) {
+  <div class="demo-banner" role="status">
+    <svg lucideClock [size]="16" aria-hidden="true"></svg>
+    <span>
+      <strong>Demo mode</strong> · everything is deleted in {{ minutes }} {{ minutes === 1 ? 'minute' : 'minutes' }}
+    </span>
+    <button type="button" (click)="auth.logout()">
+      <svg lucideLogOut [size]="14" aria-hidden="true"></svg>
+      Exit demo
+    </button>
+  </div>
+}

@@ -1,9 +1,11 @@
 package com.erstorage.erstorageapi.file;
 
 import com.erstorage.erstorageapi.common.LimitsProperties;
+import com.erstorage.erstorageapi.demo.DemoProperties;
 import com.erstorage.erstorageapi.folder.Folder;
 import com.erstorage.erstorageapi.folder.FolderRepository;
 import com.erstorage.erstorageapi.storage.StorageService;
+import com.erstorage.erstorageapi.user.User;
 import com.erstorage.erstorageapi.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,20 +30,26 @@ public class FileService {
     private static final Set<String> BLOCKED_EXTENSIONS = Set.of(
             "exe", "bat", "cmd", "msi", "com", "scr", "ps1", "vbs", "sh"
     );
+    private static final Set<String> DEMO_EXTENSIONS = Set.of(
+            "png", "jpg", "jpeg", "gif", "webp", "pdf", "txt", "md"
+    );
 
     private final FileRepository fileRepository;
     private final FolderRepository folderRepository;
     private final UserRepository userRepository;
     private final StorageService storageService;
     private final LimitsProperties limits;
+    private final DemoProperties demo;
 
     public FileService(FileRepository fileRepository, FolderRepository folderRepository,
-                       UserRepository userRepository, StorageService storageService, LimitsProperties limits) {
+                       UserRepository userRepository, StorageService storageService,
+                       LimitsProperties limits, DemoProperties demo) {
         this.fileRepository = fileRepository;
         this.folderRepository = folderRepository;
         this.userRepository = userRepository;
         this.storageService = storageService;
         this.limits = limits;
+        this.demo = demo;
     }
 
     // ---------- upload ----------
@@ -55,10 +63,15 @@ public class FileService {
         String name = cleanFileName(upload.getOriginalFilename());
         ensureAllowedType(name);
 
+        long size = upload.getSize();
+        if (findOwner(ownerId).isGuest()) {
+            ensureDemoSize(size);
+            ensureDemoType(name);
+        }
+
         Folder folder = folderId == null ? null : findOwnedFolder(ownerId, folderId);
         ensureNameAvailable(ownerId, folder, name);
 
-        long size = upload.getSize();
         long totalLimit = limits.totalStorage().toBytes();
         if (userRepository.reserveStorage(ownerId, size, totalLimit) == 0) {
             throw new ResponseStatusException(HttpStatus.INSUFFICIENT_STORAGE, "Not enough space to upload");
@@ -107,6 +120,9 @@ public class FileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File names cannot contain / or \\");
         }
         ensureAllowedType(newName);
+        if (findOwner(ownerId).isGuest()) {
+            ensureDemoType(newName);
+        }
         ensureNameAvailable(ownerId, file.getFolder(), newName);
 
         file.rename(newName);
@@ -142,6 +158,11 @@ public class FileService {
 
     // ---------- helpers ----------
 
+    private User findOwner(UUID ownerId) {
+        return userRepository.findById(ownerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not found"));
+    }
+
     private FileEntity findOwnedFile(UUID ownerId, UUID fileId) {
         return fileRepository.findByIdAndOwnerId(fileId, ownerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found"));
@@ -165,15 +186,30 @@ public class FileService {
         return name;
     }
 
-    private void ensureAllowedType(String name) {
+    private String extensionOf(String name) {
         int dot = name.lastIndexOf('.');
-        if (dot == -1) {
-            return;
-        }
-        String extension = name.substring(dot + 1).toLowerCase(Locale.ROOT);
+        return dot == -1 ? "" : name.substring(dot + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private void ensureAllowedType(String name) {
+        String extension = extensionOf(name);
         if (BLOCKED_EXTENSIONS.contains(extension)) {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
                     "Files of type ." + extension + " are not allowed");
+        }
+    }
+
+    private void ensureDemoSize(long size) {
+        if (size > demo.maxFileSize().toBytes()) {
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
+                    "Demo uploads are limited to " + demo.maxFileSize().toMegabytes() + " MB per file");
+        }
+    }
+
+    private void ensureDemoType(String name) {
+        if (!DEMO_EXTENSIONS.contains(extensionOf(name))) {
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                    "The demo only accepts images, PDFs and text files");
         }
     }
 

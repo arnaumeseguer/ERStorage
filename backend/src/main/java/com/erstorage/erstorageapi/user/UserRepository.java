@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,6 +16,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmail(String email);
 
+    long countByRoleAndExpiresAtAfter(Role role, Instant now);
+
+    @Query("select u.id from User u where u.role = :role and u.expiresAt <= :now")
+    List<UUID> findExpiredIds(@Param("role") Role role, @Param("now") Instant now);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""

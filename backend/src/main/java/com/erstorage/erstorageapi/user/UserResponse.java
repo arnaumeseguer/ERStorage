@@ -1,5 +1,6 @@
 package com.erstorage.erstorageapi.user;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record UserResponse(
@@ -7,7 +8,9 @@ public record UserResponse(
         String email,
         String displayName,
         long storageUsedBytes,
-        long storageQuotaBytes
+        long storageQuotaBytes,
+        boolean guest,
+        Instant expiresAt
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -15,7 +18,9 @@ public record UserResponse(
                 user.getEmail(),
                 user.getDisplayName(),
                 user.getStorageUsedBytes(),
-                user.getStorageQuotaBytes()
+                user.getStorageQuotaBytes(),
+                user.isGuest(),
+                user.getExpiresAt()
         );
     }
 }

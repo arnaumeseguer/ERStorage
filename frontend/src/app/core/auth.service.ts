@@ -17,6 +17,7 @@ export class AuthService {
 
   readonly currentUser = signal<UserResponse | null>(null);
   readonly isLoggedIn = computed(() => this.token() !== null);
+  readonly isGuest = computed(() => this.currentUser()?.guest ?? false);
 
   getToken(): string | null {
     return this.token();
@@ -25,6 +26,12 @@ export class AuthService {
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/api/v1/auth/login`, { email, password })
+      .pipe(tap((response) => this.storeSession(response)));
+  }
+
+  startDemo(): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/api/v1/auth/demo`, {})
       .pipe(tap((response) => this.storeSession(response)));
   }
 

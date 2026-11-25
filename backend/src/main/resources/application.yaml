@@ -34,6 +34,13 @@ erstorage:
   limits:
     registration-enabled: ${REGISTRATION_ENABLED:false}
     total-storage: ${TOTAL_STORAGE_LIMIT:8GB}
+  demo:
+    enabled: ${DEMO_ENABLED:false}
+    lifetime: 1h
+    quota: 20MB
+    max-file-size: 5MB
+    max-active-users: 30
+    max-starts-per-ip-per-hour: 5
 
 server:
   port: ${PORT:8080}

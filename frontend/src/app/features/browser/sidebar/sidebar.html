@@ -34,14 +34,19 @@
     </section>
 
     <div class="account">
-      <div class="avatar" aria-hidden="true">{{ user.displayName.charAt(0) }}</div>
+      <div class="avatar" aria-hidden="true">{{ user.guest ? 'G' : user.displayName.charAt(0) }}</div>
       <div class="account-text">
-        <strong>{{ user.displayName }}</strong>
-        <small>{{ user.email }}</small>
+        <strong>{{ user.guest ? 'Guest' : user.displayName }}</strong>
+        <small>{{ user.guest ? 'Demo account' : user.email }}</small>
       </div>
-      <button type="button" class="logout" (click)="auth.logout()" title="Log out">
-        <svg lucideLogOut [size]="16" aria-hidden="true"></svg>
-        <span class="logout-text">Log out</span>
+      <button
+        type="button"
+        class="icon-button logout"
+        (click)="auth.logout()"
+        [title]="user.guest ? 'Exit demo' : 'Log out'"
+        [attr.aria-label]="user.guest ? 'Exit demo' : 'Log out'"
+      >
+        <svg lucideLogOut [size]="18" aria-hidden="true"></svg>
       </button>
     </div>
   }

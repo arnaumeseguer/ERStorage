@@ -4,6 +4,8 @@ export interface UserResponse {
   displayName: string;
   storageUsedBytes: number;
   storageQuotaBytes: number;
+  guest: boolean;
+  expiresAt: string | null;
 }
 
 export interface LoginResponse {

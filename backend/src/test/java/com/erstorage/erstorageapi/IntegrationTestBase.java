@@ -28,7 +28,8 @@ import java.util.UUID;
         properties = {
                 "erstorage.storage.create-bucket-on-startup=false",
                 "erstorage.jwt.secret=test-only-secret-that-is-at-least-32-characters-long",
-                "erstorage.limits.registration-enabled=true"
+                "erstorage.limits.registration-enabled=true",
+                "erstorage.demo.enabled=true"
         }
 )
 @Import(TestcontainersConfiguration.class)

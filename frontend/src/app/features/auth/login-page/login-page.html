@@ -45,7 +45,7 @@
         <p class="form-error" role="alert">{{ errorMessage() }}</p>
       }
 
-      <button type="submit" class="btn-primary submit" [disabled]="submitting()">
+      <button type="submit" class="btn-primary submit" [disabled]="submitting() || startingDemo()">
         @if (submitting()) {
           <span class="spinner" aria-hidden="true"></span>
           Signing in…
@@ -55,6 +55,23 @@
       </button>
     </form>
 
-    <p class="note">Registration is closed — this is a personal instance.</p>
+    <div class="divider" aria-hidden="true"><span>or</span></div>
+
+    <button
+      type="button"
+      class="btn-secondary demo-button"
+      (click)="startDemo()"
+      [disabled]="submitting() || startingDemo()"
+    >
+      @if (startingDemo()) {
+        <span class="spinner" aria-hidden="true"></span>
+        Starting demo…
+      } @else {
+        <svg lucideSparkles [size]="18" aria-hidden="true"></svg>
+        Try the demo — no sign-up
+      }
+    </button>
+
+    <p class="note">Registration is closed. The demo gives you a private sandbox for one hour.</p>
   </section>
 </main>

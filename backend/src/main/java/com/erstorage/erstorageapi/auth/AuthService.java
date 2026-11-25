@@ -57,8 +57,8 @@ public class AuthService {
                 .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
-        String token = tokenService.createToken(user);
-        return new LoginResponse(token, tokenService.expirationSeconds(), UserResponse.from(user));
+        IssuedToken token = tokenService.createToken(user);
+        return new LoginResponse(token.value(), token.expiresInSeconds(), UserResponse.from(user));
     }
 
     private String normalizeEmail(String email) {

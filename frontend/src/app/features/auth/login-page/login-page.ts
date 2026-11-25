@@ -2,13 +2,15 @@ import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LucideSparkles } from '@lucide/angular';
 import { AuthService } from '../../../core/auth.service';
+import { problemMessage } from '../../../core/http-errors';
 import { ProblemDetail } from '../../../core/models';
 import { ServerStatusBanner } from '../../../shared/server-status-banner/server-status-banner';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, ServerStatusBanner],
+  imports: [ReactiveFormsModule, ServerStatusBanner, LucideSparkles],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
@@ -23,11 +25,12 @@ export class LoginPage {
   });
 
   protected readonly submitting = signal(false);
+  protected readonly startingDemo = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly fieldErrors = signal<Record<string, string>>({});
 
   protected submit(): void {
-    if (this.submitting()) {
+    if (this.submitting() || this.startingDemo()) {
       return;
     }
     if (this.form.invalid) {
@@ -46,6 +49,24 @@ export class LoginPage {
       error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
         this.showError(error);
+      },
+    });
+  }
+
+  protected startDemo(): void {
+    if (this.submitting() || this.startingDemo()) {
+      return;
+    }
+
+    this.startingDemo.set(true);
+    this.errorMessage.set(null);
+    this.fieldErrors.set({});
+
+    this.auth.startDemo().subscribe({
+      next: () => this.router.navigateByUrl('/files'),
+      error: (error) => {
+        this.startingDemo.set(false);
+        this.errorMessage.set(problemMessage(error));
       },
     });
   }

@@ -19,6 +19,7 @@ import {
   LucideUpload,
   LucideX,
 } from '@lucide/angular';
+import { AuthService } from '../../../core/auth.service';
 import { FilesApiService } from '../../../core/files-api.service';
 import { problemMessage } from '../../../core/http-errors';
 import { FileResponse } from '../../../core/models';
@@ -39,12 +40,30 @@ interface UploadItem {
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 const BLOCKED_EXTENSIONS = new Set(['exe', 'bat', 'cmd', 'msi', 'com', 'scr', 'ps1', 'vbs', 'sh']);
 
-function validateFile(file: File): string | null {
+const DEMO_MAX_FILE_BYTES = 5 * 1024 * 1024;
+const DEMO_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'txt', 'md'];
+
+function extensionOf(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
+}
+
+function validateFile(file: File, guest: boolean): string | null {
+  const extension = extensionOf(file.name);
+
+  if (guest) {
+    if (file.size > DEMO_MAX_FILE_BYTES) {
+      return 'The demo accepts files up to 5 MB.';
+    }
+    if (!DEMO_EXTENSIONS.includes(extension)) {
+      return 'The demo only accepts images, PDFs and text files.';
+    }
+    return null;
+  }
+
   if (file.size > MAX_FILE_BYTES) {
     return 'Larger than 100 MB.';
   }
-  const dot = file.name.lastIndexOf('.');
-  const extension = dot > 0 ? file.name.slice(dot + 1).toLowerCase() : '';
   if (BLOCKED_EXTENSIONS.has(extension)) {
     return 'This file type is not allowed.';
   }
@@ -70,6 +89,7 @@ function hasFiles(event: DragEvent): boolean {
 })
 export class UploadDialog {
   private readonly api = inject(FilesApiService);
+  private readonly auth = inject(AuthService);
 
   readonly folderId = input<string | null>(null);
   readonly folderName = input('My files');
@@ -84,6 +104,14 @@ export class UploadDialog {
   protected readonly items = signal<UploadItem[]>([]);
   protected readonly dragging = signal(false);
   protected readonly fileIcon = fileIcon;
+
+  protected readonly isGuest = this.auth.isGuest;
+  protected readonly limitHint = computed(() =>
+    this.isGuest() ? 'Demo: images, PDFs and text up to 5 MB' : 'Up to 100 MB per file',
+  );
+  protected readonly acceptTypes = computed(() =>
+    this.isGuest() ? DEMO_EXTENSIONS.map((extension) => '.' + extension).join(',') : null,
+  );
 
   protected readonly isUploading = computed(() =>
     this.items().some((item) => item.status === 'pending' || item.status === 'uploading' || item.status === 'processing'),
@@ -195,8 +223,9 @@ export class UploadDialog {
     if (files.length === 0) {
       return;
     }
+    const guest = this.isGuest();
     const newItems = files.map((file): UploadItem => {
-      const error = validateFile(file);
+      const error = validateFile(file, guest);
       return {
         id: this.nextId++,
         file,

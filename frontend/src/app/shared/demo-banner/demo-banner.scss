@@ -1,0 +1,35 @@
+.demo-banner {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.55rem 0.6rem 0.55rem 1rem;
+  border-radius: 999px;
+  background: var(--green-700);
+  color: #fff;
+  font-size: 0.875rem;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.25);
+  transform: translateX(-50%);
+}
+
+.demo-banner button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.demo-banner button:hover {
+  background: rgb(255 255 255 / 0.3);
+}

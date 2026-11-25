@@ -15,8 +15,15 @@
     <svg lucideUpload [size]="28" aria-hidden="true"></svg>
     <p>Drag files here or</p>
     <button type="button" class="btn-secondary" (click)="chooseFiles()">Choose files</button>
-    <p class="hint">Up to 100 MB per file</p>
-    <input #fileInput type="file" multiple hidden (change)="onFilesSelected($event)" />
+    <p class="hint">{{ limitHint() }}</p>
+    <input
+      #fileInput
+      type="file"
+      multiple
+      hidden
+      [attr.accept]="acceptTypes()"
+      (change)="onFilesSelected($event)"
+    />
   </div>
 
   @if (items().length > 0) {

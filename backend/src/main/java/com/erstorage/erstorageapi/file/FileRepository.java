@@ -26,6 +26,9 @@ public interface FileRepository extends JpaRepository<FileEntity, UUID> {
     List<StoredObject> findStoredObjectsInFolders(@Param("ownerId") UUID ownerId,
                                                   @Param("folderIds") Collection<UUID> folderIds);
 
+    @Query("select f.storageKey from FileEntity f where f.ownerId in :ownerIds")
+    List<String> findStorageKeysByOwnerIds(@Param("ownerIds") Collection<UUID> ownerIds);
+
     boolean existsByOwnerIdAndFolderIsNullAndName(UUID ownerId, String name);
 
     boolean existsByOwnerIdAndFolderIdAndName(UUID ownerId, UUID folderId, String name);
