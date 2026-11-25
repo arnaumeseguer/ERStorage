@@ -4,7 +4,7 @@ A personal cloud file manager: folders, uploads with live progress, downloads, r
 
 Built with **Java 25 + Spring Boot 4** and **Angular 22**, deployed for free on **Render**, **Neon**, **Cloudflare R2** and **Vercel**.
 
-**▶ Live demo: [YOUR-APP.vercel.app](https://YOUR-APP.vercel.app)**. Click **"Try the demo"**, no sign-up needed.
+**▶ Live demo: [ERStorage App](https://erstorage.vercel.app/files)**. Click **"Try the demo"**, no sign-up needed.
 
 > The API runs on a free tier that sleeps when nobody uses it. The first visit can take a minute while it wakes up; the app shows a banner while it does.
 
