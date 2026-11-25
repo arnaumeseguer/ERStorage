@@ -1,5 +1,6 @@
 package com.erstorage.erstorageapi.auth;
 
+import com.erstorage.erstorageapi.common.LimitsProperties;
 import com.erstorage.erstorageapi.user.User;
 import com.erstorage.erstorageapi.user.UserRepository;
 import com.erstorage.erstorageapi.user.UserResponse;
@@ -17,15 +18,24 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final LimitsProperties limits;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       TokenService tokenService,
+                       LimitsProperties limits) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.limits = limits;
     }
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
+        if (!limits.registrationEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Registration is closed");
+        }
+
         String email = normalizeEmail(request.email());
 
         if (userRepository.existsByEmail(email)) {

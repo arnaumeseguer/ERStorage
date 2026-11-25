@@ -31,6 +31,9 @@ erstorage:
     create-bucket-on-startup: ${STORAGE_CREATE_BUCKET:true}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  limits:
+    registration-enabled: ${REGISTRATION_ENABLED:false}
+    total-storage: ${TOTAL_STORAGE_LIMIT:8GB}
 
 server:
   port: ${PORT:8080}
