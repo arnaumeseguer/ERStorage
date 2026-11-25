@@ -3,7 +3,6 @@ import { DatePipe } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { UploadDialog } from '../upload-dialog/upload-dialog';
 import {
   LucideArrowDown,
   LucideArrowUp,
@@ -17,8 +16,8 @@ import {
   LucideSearchX,
   LucideTrash2,
   LucideTriangleAlert,
-  LucideX,
   LucideUpload,
+  LucideX,
 } from '@lucide/angular';
 import { AuthService } from '../../../core/auth.service';
 import { breadcrumbTrail } from '../../../core/breadcrumbs';
@@ -32,6 +31,7 @@ import { NameDialog } from '../../../shared/name-dialog/name-dialog';
 import { SortKey, sortItems } from '../../../shared/sorting';
 import { MoveDialog } from '../move-dialog/move-dialog';
 import { Sidebar } from '../sidebar/sidebar';
+import { UploadDialog } from '../upload-dialog/upload-dialog';
 
 type DialogState =
   | { type: 'create-folder' }
@@ -45,6 +45,10 @@ function targetOf(state: DialogState | null, type: 'rename' | 'move' | 'delete')
   return state.target;
 }
 
+function hasFiles(event: DragEvent): boolean {
+  return event.dataTransfer?.types.includes('Files') ?? false;
+}
+
 @Component({
   selector: 'app-browser-page',
   imports: [
@@ -55,6 +59,7 @@ function targetOf(state: DialogState | null, type: 'rename' | 'move' | 'delete')
     NameDialog,
     ConfirmDialog,
     MoveDialog,
+    UploadDialog,
     LucideDynamicIcon,
     LucideDownload,
     LucideFolder,
@@ -65,9 +70,8 @@ function targetOf(state: DialogState | null, type: 'rename' | 'move' | 'delete')
     LucideSearchX,
     LucideTrash2,
     LucideTriangleAlert,
-    LucideX,
     LucideUpload,
-    UploadDialog,
+    LucideX,
   ],
   templateUrl: './browser-page.html',
   styleUrl: './browser-page.scss',
@@ -119,6 +123,9 @@ export class BrowserPage {
   protected readonly dialogError = signal<string | null>(null);
   protected readonly actionError = signal<string | null>(null);
   protected readonly downloadingId = signal<string | null>(null);
+  protected readonly draggingFiles = signal(false);
+  protected readonly droppedFiles = signal<File[]>([]);
+  private dragDepth = 0;
 
   protected readonly isCreatingFolder = computed(() => this.dialog()?.type === 'create-folder');
   protected readonly isUploadOpen = computed(() => this.dialog()?.type === 'upload');
@@ -146,6 +153,7 @@ export class BrowserPage {
     }
     this.dialog.set(null);
     this.dialogError.set(null);
+    this.droppedFiles.set([]);
   }
 
   protected createFolder(name: string): void {
@@ -189,9 +197,61 @@ export class BrowserPage {
     });
   }
 
-    protected onUploaded(): void {
+  protected onUploaded(): void {
     this.contents.reload();
     this.auth.loadCurrentUser().subscribe();
+  }
+
+  protected openUpload(files: File[] = []): void {
+    this.droppedFiles.set(files);
+    this.openDialog({ type: 'upload' });
+  }
+
+  protected onDragEnter(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    this.dragDepth++;
+    this.draggingFiles.set(this.canDropHere());
+  }
+
+  protected onDragOver(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = this.canDropHere() ? 'copy' : 'none';
+    }
+  }
+
+  protected onDragLeave(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (this.dragDepth === 0) {
+      this.draggingFiles.set(false);
+    }
+  }
+
+  protected onDrop(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    this.dragDepth = 0;
+    this.draggingFiles.set(false);
+
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    if (files.length > 0 && this.canDropHere()) {
+      this.openUpload(files);
+    }
+  }
+
+  private canDropHere(): boolean {
+    return this.contents.hasValue() && this.dialog() === null;
   }
 
   private run(request: Observable<unknown>, refreshUser = false): void {

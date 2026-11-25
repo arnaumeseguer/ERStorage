@@ -51,6 +51,10 @@ function validateFile(file: File): string | null {
   return null;
 }
 
+function hasFiles(event: DragEvent): boolean {
+  return event.dataTransfer?.types.includes('Files') ?? false;
+}
+
 @Component({
   selector: 'app-upload-dialog',
   imports: [
@@ -69,6 +73,7 @@ export class UploadDialog {
 
   readonly folderId = input<string | null>(null);
   readonly folderName = input('My files');
+  readonly initialFiles = input<File[]>([]);
 
   readonly uploaded = output<FileResponse>();
   readonly closed = output<void>();
@@ -94,10 +99,14 @@ export class UploadDialog {
   });
 
   private nextId = 0;
+  private dragDepth = 0;
   private current: Subscription | null = null;
 
   constructor() {
-    afterNextRender(() => this.dialog().nativeElement.showModal());
+    afterNextRender(() => {
+      this.dialog().nativeElement.showModal();
+      this.addFiles(this.initialFiles());
+    });
     inject(DestroyRef).onDestroy(() => this.current?.unsubscribe());
   }
 
@@ -107,23 +116,47 @@ export class UploadDialog {
 
   protected onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.addFiles(input.files);
+    this.addFiles(Array.from(input.files ?? []));
     input.value = '';
   }
 
-  protected onDragOver(event: DragEvent): void {
+  protected onDragEnter(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
     event.preventDefault();
+    this.dragDepth++;
     this.dragging.set(true);
   }
 
-  protected onDragLeave(): void {
-    this.dragging.set(false);
+  protected onDragOver(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+  }
+
+  protected onDragLeave(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (this.dragDepth === 0) {
+      this.dragging.set(false);
+    }
   }
 
   protected onDrop(event: DragEvent): void {
+    if (!hasFiles(event)) {
+      return;
+    }
     event.preventDefault();
+    this.dragDepth = 0;
     this.dragging.set(false);
-    this.addFiles(event.dataTransfer?.files ?? null);
+    this.addFiles(Array.from(event.dataTransfer?.files ?? []));
   }
 
   protected cancel(item: UploadItem): void {
@@ -158,11 +191,11 @@ export class UploadDialog {
     this.close();
   }
 
-  private addFiles(fileList: FileList | null): void {
-    if (!fileList || fileList.length === 0) {
+  private addFiles(files: File[]): void {
+    if (files.length === 0) {
       return;
     }
-    const newItems = Array.from(fileList, (file): UploadItem => {
+    const newItems = files.map((file): UploadItem => {
       const error = validateFile(file);
       return {
         id: this.nextId++,

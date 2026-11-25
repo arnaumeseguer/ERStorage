@@ -179,3 +179,25 @@ button:disabled {
   gap: 0.5rem;
   margin-top: 1.5rem;
 }
+
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--gray-500);
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.icon-button--danger:hover:not(:disabled) {
+  background: var(--red-50);
+  color: var(--red-600);
+}

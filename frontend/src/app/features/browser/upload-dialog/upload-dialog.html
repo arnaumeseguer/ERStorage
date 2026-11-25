@@ -4,16 +4,14 @@
   (keydown.escape)="onEscape($event)"
   (cancel)="onEscape($event)"
   (close)="closed.emit()"
+  (dragenter)="onDragEnter($event)"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
 >
   <h2>Upload to “{{ folderName() }}”</h2>
 
-  <div
-    class="dropzone"
-    [class.dragging]="dragging()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave()"
-    (drop)="onDrop($event)"
-  >
+  <div class="dropzone" [class.dragging]="dragging()">
     <svg lucideUpload [size]="28" aria-hidden="true"></svg>
     <p>Drag files here or</p>
     <button type="button" class="btn-secondary" (click)="chooseFiles()">Choose files</button>

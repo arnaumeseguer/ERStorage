@@ -48,8 +48,37 @@
   white-space: nowrap;
 }
 
+.header-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .refreshing {
   color: var(--green-500);
+}
+
+.action-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--red-50);
+  color: var(--red-600);
+  font-size: 0.9rem;
+}
+
+.action-error button {
+  display: inline-grid;
+  place-items: center;
+  margin-left: auto;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  color: inherit;
 }
 
 .table {
@@ -91,6 +120,10 @@ th {
   width: 140px;
 }
 
+.col-actions {
+  width: 160px;
+}
+
 .sort {
   display: inline-flex;
   align-items: center;
@@ -129,6 +162,19 @@ a.name:hover .name-text {
   white-space: nowrap;
 }
 
+.file-button {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.file-button:hover .name-text {
+  color: var(--green-700);
+  text-decoration: underline;
+}
+
 .icon {
   flex-shrink: 0;
   color: var(--gray-500);
@@ -137,8 +183,22 @@ a.name:hover .name-text {
 .icon--folder {
   color: var(--green-600);
 }
+
 .muted {
   color: var(--gray-500);
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+tbody tr:hover .row-actions,
+tbody tr:focus-within .row-actions {
+  opacity: 1;
 }
 
 .state {
@@ -160,103 +220,13 @@ a.name:hover .name-text {
   color: var(--gray-500);
 }
 
+.state-hint {
+  font-size: 0.85rem;
+}
+
 .state .btn-primary {
   margin-top: 0.5rem;
   text-decoration: none;
-}
-
-@media (max-width: 720px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .content {
-    padding: 1rem;
-  }
-
-  .col-date {
-    display: none;
-  }
-}
-
-.header-actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.5rem;
-  margin-left: auto;
-}
-
-.action-error {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius);
-  background: var(--red-50);
-  color: var(--red-600);
-  font-size: 0.9rem;
-}
-
-.action-error button {
-  display: inline-grid;
-  place-items: center;
-  margin-left: auto;
-  padding: 0.2rem;
-  border: none;
-  background: none;
-  color: inherit;
-}
-
-.col-actions {
-  width: 160px;
-}
-
-.row-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.15rem;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-tbody tr:hover .row-actions,
-tbody tr:focus-within .row-actions {
-  opacity: 1;
-}
-
-.icon-button {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 8px;
-  background: none;
-  color: var(--gray-500);
-}
-
-.icon-button:hover:not(:disabled) {
-  background: var(--green-100);
-  color: var(--green-700);
-}
-
-.icon-button--danger:hover:not(:disabled) {
-  background: var(--red-50);
-  color: var(--red-600);
-}
-
-.file-button {
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  text-align: left;
-}
-
-.file-button:hover .name-text {
-  color: var(--green-700);
-  text-decoration: underline;
 }
 
 .visually-hidden {
@@ -268,6 +238,36 @@ tbody tr:focus-within .row-actions {
   white-space: nowrap;
 }
 
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(240 253 244 / 0.85);
+  pointer-events: none;
+}
+
+.drop-message {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: min(480px, 100%);
+  padding: 2.5rem 1.5rem;
+  border: 3px dashed var(--green-500);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--green-700);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.drop-message p {
+  margin: 0;
+}
+
 @media (hover: none) {
   .row-actions {
     opacity: 1;
@@ -275,7 +275,20 @@ tbody tr:focus-within .row-actions {
 }
 
 @media (max-width: 720px) {
-  .col-size {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-wrap: wrap;
+  }
+
+  .col-size,
+  .col-date {
     display: none;
   }
 
@@ -285,9 +298,5 @@ tbody tr:focus-within .row-actions {
 
   .icon-button {
     width: 30px;
-  }
-
-    .page-header {
-    flex-wrap: wrap;
   }
 }
